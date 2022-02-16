@@ -1,13 +1,3 @@
-CREATE DATABASE vet_clinic;
-CREATE TABLE animals(
-    id INT GENERATED ALWAYS AS IDENTITY,
-    name TEXT,
-    date_of_birth DATE,
-    escape_attempts INT,
-    neutered BOOLEAN,
-    weight_kg DECIMAL
-);
-
 INSERT INTO animals (name,date_of_birth,escape_attempts,neutered,weight_kg)
  VALUES ('Agumon','2020-03-02',0,TRUE,10.23);
 
