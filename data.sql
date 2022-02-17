@@ -1,11 +1,32 @@
-INSERT INTO animals (name,date_of_birth,escape_attempts,neutered,weight_kg)
- VALUES ('Agumon','2020-03-02',0,TRUE,10.23);
+BEGIN TRANSACTION;
+UPDATE animals
+SET species='unspecified' ;
 
- INSERT INTO animals (name,date_of_birth,escape_attempts,neutered,weight_kg)
- VALUES ('Gabumon','2018-11-15',2,TRUE,8);
+ROLLBACK TRANSACTION;
 
- INSERT INTO animals (name,date_of_birth,escape_attempts,neutered,weight_kg)
- VALUES ('Pikachu','2021-01-07,1',FALSE,15.04);
+BEGIN TRANSACTION;
+UPDATE animals
+SET species='digimon' WHERE name LIKE '%mon' ;
+UPDATE animals
+SET species='pokemon' WHERE species IS NULL;
+COMMIT TRANSACTION;
+SELECT species FROM animals;
 
- INSERT INTO animals (name,date_of_birth,escape_attempts,neutered,weight_kg)
- VALUES ('Devimon','2017-12-05',5,TRUE,11);
+
+BEGIN TRANSACTION;
+DELETE FROM animals;
+ROLLBACK TRANSACTION;
+SELECT species FROM animals;
+
+
+BEGIN TRANSACTION;
+DELETE FROM animals WHERE date_of_birth >= '2022-01-01';
+SAVEPOINT beforeChange;
+UPDATE animals
+SET weight_kg = weight_kg*-1;
+ROLLBACK TO beforeChange;
+SELECT COUNT(*) FROM ANIMALS;
+UPDATE animals
+SET weight_kg = weight_kg*-1 WHERE weight_kg<0;
+COMMIT TRANSACTION;
+SELECT species FROM animals;
