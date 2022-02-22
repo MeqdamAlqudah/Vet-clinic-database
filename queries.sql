@@ -132,6 +132,7 @@ FULL JOIN animals
 ON  visits.animals_id=animals.name
 WHERE specializations.species_id IS NULL
 GROUP BY visits.vets_id,visits.animals_id,animals.species_id
+
 ORDER BY COUNT (visits.animals_id) DESC;
 -- 4 Depening on your machine speed, it might be enough or not. Check that by running explain analyze SELECT COUNT(*) FROM visits where animal_id = 4: - If you get Execution time: X ms and X >= 1000: that should be enough, you can continue to the project requirements. - If you get Execution time: X ms and X < 1000: please go back to point 3. and repeat until you get a value bigger than 1000ms.
 explain analyze SELECT COUNT(*) FROM visits where animal_id = 4;
@@ -209,3 +210,4 @@ explain analyze SELECT * FROM owners where email = 'owner_18327@mail.com';
 --  Planning Time: 6.640 ms
 --  Execution Time: 1.385 ms
 -- (4 rows)
+
