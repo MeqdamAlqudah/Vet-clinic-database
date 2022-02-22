@@ -53,8 +53,21 @@ CREATE TABLE specializations(
 	PRIMARY KEY (vets_id, species_id));
 -- There is a many-to-many relationship between the tables animals and vets: an animal can visit multiple vets and one vet can be visited by multiple animals. Create a "join table" called visits to handle this relationship, it should also keep track of the date of the visit.
 CREATE TABLE visits(
-    vets_id TEXT NOT NULL,
-    animals_id TEXT NOT NULL,
-    visit_date DATE,
-    FOREIGN KEY (vets_id) REFERENCES vets (name) ON DELETE RESTRICT ON UPDATE CASCADE,
-	FOREIGN KEY (animals_id) REFERENCES animals (name) ON DELETE RESTRICT ON UPDATE CASCADE);
+  id INT GENERATED ALWAYS AS IDENTITY,
+  animal_id INT REFERENCES animals(id),
+  vet_id INT REFERENCES vets(id),
+  date_of_visit DATE,
+  PRIMARY KEY(id)
+);
+-- CREATE TABLE visits(
+--     vet_id TEXT NOT NULL,
+--     animal_id TEXT NOT NULL,
+--     date_of_visit DATE,
+--     FOREIGN KEY (vet_id) REFERENCES vets (name) ON DELETE RESTRICT ON UPDATE CASCADE,
+-- 	FOREIGN KEY (animal_id) REFERENCES animals (name) ON DELETE RESTRICT ON UPDATE CASCADE);
+-- Add an email column to your owners table
+ALTER TABLE owners ADD COLUMN email VARCHAR(120);
+
+CREATE INDEX visits_animal ON visits( animal_id DESC);
+CREATE INDEX owners_email ON owners( email DESC);
+

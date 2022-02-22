@@ -132,4 +132,82 @@ FULL JOIN animals
 ON  visits.animals_id=animals.name
 WHERE specializations.species_id IS NULL
 GROUP BY visits.vets_id,visits.animals_id,animals.species_id
+
 ORDER BY COUNT (visits.animals_id) DESC;
+-- 4 Depening on your machine speed, it might be enough or not. Check that by running explain analyze SELECT COUNT(*) FROM visits where animal_id = 4: - If you get Execution time: X ms and X >= 1000: that should be enough, you can continue to the project requirements. - If you get Execution time: X ms and X < 1000: please go back to point 3. and repeat until you get a value bigger than 1000ms.
+explain analyze SELECT COUNT(*) FROM visits where animal_id = 4;
+--------------------
+--  Finalize Aggregate  (cost=39520.08..39520.09 rows=1 width=8) (actual time=1200.390..1214.782 rows=1 loops=1)
+--    ->  Gather  (cost=39519.87..39520.08 rows=2 width=8) (actual time=1200.149..1214.766 rows=3 loops=1)
+--          Workers Planned: 2
+--          Workers Launched: 2
+--          ->  Partial Aggregate  (cost=38519.87..38519.88 rows=1 width=8) (actual time=1088.700..1088.701 rows=1 loops=3)               ->  Parallel Seq Scan on visits  (cost=0.00..38149.21 rows=148264 width=0) (actual time=0.851..1073.039 rows=119809 loops=3)
+--                      Filter: (animal_id = 4)
+--                      Rows Removed by Filter: 1078284
+--  Planning Time: 11.942 ms
+--  Execution Time: 1216.376 ms 😎👍
+-- (10 rows)
+
+explain analyze SELECT COUNT(*) FROM visits where animal_id = 4;
+-- --------------------
+--  Finalize Aggregate  (cost=39520.08..39520.09 rows=1 width=8) (actual time=2062.446..2110.918 rows=1 loops=1)
+--    ->  Gather  (cost=39519.87..39520.08 rows=2 width=8) (actual time=2062.433..2110.908 rows=3 loops=1)
+--          Workers Planned: 2
+--          Workers Launched: 2
+--          ->  Partial Aggregate  (cost=38519.87..38519.88 rows=1 width=8) (actual time=1846.373..1846.374 rows=1 loops=3)               ->  Parallel Seq Scan on visits  (cost=0.00..38149.21 rows=148264 width=0) (actual time=0.670..1823.927 rows=119809 loops=3)
+--                      Filter: (animal_id = 4)
+--                      Rows Removed by Filter: 1078284
+--  Planning Time: 0.229 ms
+--  Execution Time: 2111.173 ms
+-- (10 rows)
+-- after indexing 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--  Finalize Aggregate  (cost=6730.70..6730.71 rows=1 width=8) (actual time=507.485..568.361 rows=1 loops=1)
+--    ->  Gather  (cost=6730.49..6730.70 rows=2 width=8) (actual time=488.428..568.315 rows=3 loops=1)
+--          Workers Planned: 2
+--          Workers Launched: 2
+--          ->  Partial Aggregate  (cost=5730.49..5730.50 rows=1 width=8) (actual time=160.937..160.949 rows=1 loops=3)
+--                ->  Parallel Index Only Scan using visits_animal on visits  (cost=0.43..5359.83 rows=148264 width=0) (actual time=0.809..111.164 rows=119809 loops=3)
+--                      Index Cond: (animal_id = 4)
+--                      Heap Fetches: 0
+--  Planning Time: 7.383 ms
+--  Execution Time: 572.285 ms 😎👍
+-- (10 rows)
+
+explain analyze SELECT * FROM visits where vet_id = 2;
+--  Seq Scan on visits  (cost=0.00..64357.50 rows=900727 width=16) (actual time=0.416..1143.809 rows=898570 loops=1)
+--    Filter: (vet_id = 2)
+--    Rows Removed by Filter: 2695710
+--  Planning Time: 1.607 ms
+--  Execution Time: 1190.923 ms
+-- (5 rows)
+-- affter
+explain analyze SELECT * FROM visits where vet_id = 2
+ORDER BY vet_id;
+-- After ordering the items
+--                                                    QUERY PLAN
+-- -----------------------------------------------------------------------------------------------------------------
+--  Seq Scan on visits  (cost=0.00..64357.50 rows=904560 width=16) (actual time=0.597..663.851 rows=898570 loops=1)
+--    Filter: (vet_id = 2)
+--    Rows Removed by Filter: 2695710
+--  Planning Time: 0.151 ms
+--  Execution Time: 703.389 ms 😎👍
+-- (5 rows)
+explain analyze SELECT * FROM owners where email = 'owner_18327@mail.com';
+--  Gather  (cost=1000.00..36372.96 rows=1 width=43) (actual time=15.161..1692.798 rows=1 loops=1)
+--    Workers Planned: 2
+--    Workers Launched: 2
+--    ->  Parallel Seq Scan on owners  (cost=0.00..35372.86 rows=1 width=43) (actual time=908.252..1439.253 rows=0 loops=3)         Filter: ((email)::text = 'owner_18327@mail.com'::text)
+--          Rows Removed by Filter: 833335
+--  Planning Time: 2.014 ms
+--  Execution Time: 1692.918 ms
+-- (8 rows)
+-- After:-
+--                                                       QUERY PLAN
+-- ----------------------------------------------------------------------------------------------------------------------
+--  Index Scan using owners_email on owners  (cost=0.43..8.45 rows=1 width=43) (actual time=0.513..0.515 rows=1 loops=1)
+--    Index Cond: ((email)::text = 'owner_18327@mail.com'::text)
+--  Planning Time: 6.640 ms
+--  Execution Time: 1.385 ms
+-- (4 rows)
+
